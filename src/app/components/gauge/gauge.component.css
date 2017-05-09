@@ -1,0 +1,23 @@
+.app-gauge__wrapper {
+  background-color: #10a9c4;
+  height: 200px;
+  width: 200px;
+}
+
+circle.app-gauge__spinner-point--animated {
+  animation: anim 1s linear infinite;
+}
+
+@keyframes anim {
+  0% {
+    stroke-dashoffset: 596.9026041820607;
+    animation-timing-function: linear;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+circle.app-gauge__gauge {
+  transition: stroke-dashoffset 0.3s ease-in-out;
+}

@@ -1,0 +1,35 @@
+<hr>
+<app-gauge></app-gauge>
+<input type="file" id="music" (change)="onLoad($event)"/>
+<div class="row">
+  <div class="col-sm-8 col-sm-offset-2">
+    <input type="range" min="0" max="100" value="50" (input)="onVolumeChange($event)">
+  </div>
+</div>
+<div class="row">
+  <div class="xol-sm-12">
+    <div class="btn-group" role="group" aria-label="audio-controls">
+      <button type="button" class="btn btn-default" (click)="onMute()">
+        <span class="glyphicon glyphicon-volume-off"></span>
+      </button>
+      <button type="button" class="btn btn-default" (click)="onPlay()">
+        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="btn btn-default">
+        <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="btn btn-default" (click)="onStop()">
+        <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="btn btn-default">
+        <span class="glyphicon glyphicon-step-backward" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="btn btn-default">
+        <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="btn btn-default">
+        <span class="glyphicon glyphicon-eject" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</div>

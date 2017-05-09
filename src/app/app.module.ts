@@ -4,10 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
+import { GaugeComponent } from './components/gauge/gauge.component';
+import { AudioComponent } from './components/audio/audio.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    GaugeComponent,
+    AudioComponent
   ],
   imports: [
     BrowserModule,
