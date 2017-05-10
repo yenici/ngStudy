@@ -1,5 +1,5 @@
 .chess {
   background-color: #10a9c4;
-  width: 500px;
-  height: 500px;
+  width: 100%;
+  min-height: 500px;
 }
