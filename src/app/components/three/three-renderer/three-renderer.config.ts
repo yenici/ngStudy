@@ -4,7 +4,7 @@ export default {
     defaultHeight: 318
   },
   renderer: {
-    backgroundColor: 0xC0C0C0,
+    backgroundColor: 0xc0c0c0,
     backgroundOpacity: 1,
     backgroundImageUrl: '',
     backgroundCubeSize: 100,
@@ -27,7 +27,7 @@ export default {
       speed: 0.5
     },
     autorotate: {
-      speed: 0
+      speed: 0.5
     }
   },
   light: {

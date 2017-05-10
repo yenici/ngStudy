@@ -5,7 +5,6 @@ import { CheckerColors } from './checker.colors';
 const MATERIAL_TEMPLATE = {
   emissive: 0,
   specular: new THREE.Color(1, 1, 1),
-  shiness: CONFIG.piece.colors.shiness,
   shading: THREE.SmoothShading,
   vertexColors: THREE.NoColors,
   transparent: true,

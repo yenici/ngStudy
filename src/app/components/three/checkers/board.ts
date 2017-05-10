@@ -5,7 +5,6 @@ import { CheckerColors } from './checker.colors';
 const MATERIAL_TEMPLATE = {
   emissive: 0,
   specular: new THREE.Color(1, 1, 1),
-  shiness: CONFIG.board.square.shiness,
   shading: THREE.SmoothShading,
   vertexColors: THREE.NoColors,
   transparent: true,
@@ -42,7 +41,6 @@ export class Board {
       MATERIAL_TEMPLATE,
       {
         color: CONFIG.board.box.color,
-        shiness: CONFIG.board.box.shiness,
         opacity: CONFIG.board.box.opacity
       }));
     const boxLength = CONFIG.board.size * CONFIG.board.square.size + 2 * CONFIG.board.box.width;

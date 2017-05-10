@@ -236,19 +236,10 @@ export class ThreeRenderer {
           this.config.light.spot.position.y,
           this.config.light.spot.position.z);
     spotLight.castShadow = true;
-    spotLight.shadowCameraNear = 0.5;
+    spotLight.shadow.camera.near = 0.5;
     this.scene.add(spotLight);
     // const helper = new THREE.CameraHelper(spotLight.shadow.camera);
     // this.scene.add(helper);
-
-//       if (this.config.light.spot.castShadow) {
-//         spotLight.castShadow = true;
-//         spotLight.shadowDarkness = this.config.light.spot.shadowDarkness;
-// spotLight.shadowCameraVisible = true;
-//       } else {
-//         spotLight.castShadow = false;
-//       }
-      this.scene.add(spotLight);
   }
 
   /**
