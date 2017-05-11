@@ -27,7 +27,7 @@ export default {
       speed: 0.5
     },
     autorotate: {
-      speed: 0.5
+      speed: 0
     }
   },
   light: {
@@ -43,7 +43,7 @@ export default {
 
   // For debugging purpose only
   helpers: {
-    isAxisVisible: true,
+    isAxisVisible: false,
     outerBox: {
       isVisible: false,
       color: 0x0000FF
@@ -53,6 +53,9 @@ export default {
       widthSegments: 20,
       heightSegments: 20,
       color: 0xFFFF00
+    },
+    cameraHelper: {
+      isVisible: false
     }
   }
 };

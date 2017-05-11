@@ -1,9 +1,9 @@
 export default {
   board: {
-    size: 3,
-    lines: 1,
+    size: 8,
+    lines: 3,
     box: {
-      width: 0.25,
+      margin: 0.25,
       color: 0x49281f,
       opacity: 1
     },
@@ -25,6 +25,7 @@ export default {
     colors: {
       light: 0xfecd4d,
       dark: 0x6f4e45,
+      active: 0xdd0000,
       opacity: 0.95
     }
   }

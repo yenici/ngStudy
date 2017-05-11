@@ -12,42 +12,54 @@
  *
  */
 
+import { NgZone } from '@angular/core/src/zone';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { merge } from 'lodash';
 import * as THREE from 'three';
 import ScreenFull from 'screenfull';
 import OrbitControls from 'three-orbit-controls';
-
 import RENDERER_CONFIG from './three-renderer.config';
 
 THREE.OrbitControls = OrbitControls(THREE);
 THREE.OrbitControls.prototype.constructor = THREE.OrbitControls;
 
 export class ThreeRenderer {
+  public activeMesh = new BehaviorSubject<THREE.Mesh>(null);
+
+  private config = RENDERER_CONFIG;
   private dimensions: { width: number, height: number };
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private cameraControl: THREE.OrbitControls;
-  // private animationFrameId: window.requestAnimationFrame;
   private animationFrameId: any;
   private mesh: THREE.Group;
 
+  private resizeCanvas: () => void | null;
+
+  private raycaster = new THREE.Raycaster();
+  private intersectedObject: THREE.Mesh;
+  private mouseListener = (event: MouseEvent) => this.onMouseMove(event);
+
   /**
    * Create a viewer
+   * @param {NgZone} ngZone
    * @param {HTMLDivElement} containerElement - container element
    * @param {Object} config - viewer's configuration parameters
    *
    * @constructor
    */
-  constructor(private containerElement: HTMLDivElement, private config?) {
+  constructor(private ngZone: NgZone, private containerElement: HTMLDivElement, config?) {
     this.config = merge({}, RENDERER_CONFIG, config);
     this.dimensions = {
       width: this.containerElement.clientWidth || this.config.container.defaultWidth,
-      height: this.containerElement.clientHeight || this.config.container.defaultHeight,
+      height: this.containerElement.clientHeight || this.config.container.defaultHeight
     };
     this.initRenderer();
     this.initLight();
     this.initCamera();
+
+    this.containerElement.addEventListener('mousemove', this.mouseListener, false);
   }
 
   /**
@@ -93,116 +105,40 @@ export class ThreeRenderer {
       .map(group => this.scene.remove(group));
   }
 
-    /**
-     * Create a snapshot of a current canvas
-     * @param {string} fileName - image file name
-     * @param {string} mimeType - MIME type of an image
-     * @param {number} qualityArgument - image quality (0...1]
-     * @return {Promise} that returns {@link File} when the snapshot has been taken
-     *         or {@link Error} if some error occurs
-     */
-    // doSnapshot (fileName = 'snapshot', mimeType = 'image/png', qualityArgument = 1) {
-    //     return new Promise((resolve, reject) => {
-    //         if (this.renderer.domElement.toBlob) {
-    //             this.renderer.domElement.toBlob(
-    //                 blob => resolve(new File([blob], fileName, {type: mimeType})),
-    //                 mimeType,
-    //                 qualityArgument);
-    //         } else if (this.renderer.domElement.msToBlob) { // IE &Edge support
-    //             this.renderer.domElement.msToBlob(blob => resolve(new File([blob])));
-    //         } else {
-    //             reject(new Error('Browser don\'t support thumbnail functionality.'));
-    //         }
-    //     });
-    // }
-
-    /**
-     * Create an array of textures for each side of the background cube
-     * @param url {string} - url of the background image
-     * @returns {Promise}
-     * @private
-     */
-    // _getCubeMaterials (url) {
-    //     return new Promise((resolve, reject) => {
-    //         const SURFACES_COUNT = 6; // The number of cube's surfaces
-    //         let imageLoader = new THREE.ImageLoader();
-    //
-    //         imageLoader.load(url, (image) => {
-    //             let cubeSize = image.height;
-    //             let canvasTemplate = document.createElement('canvas');
-    //             canvasTemplate.width = cubeSize;
-    //             canvasTemplate.height = cubeSize;
-    //             let materials = new Array(SURFACES_COUNT)
-    //                 .fill(canvasTemplate)
-    //                 .map((emptyCanvas, index) => {
-    //                     let canvas = emptyCanvas.cloneNode(false);
-    //                     canvas.getContext('2d')
-    //                         .drawImage(image, cubeSize * index, 0, cubeSize, cubeSize, 0, 0, cubeSize, cubeSize);
-    //                     let material = new THREE.Texture(canvas);
-    //                     material.needsUpdate = true;
-    //                     return material;
-    //                 })
-    //                 .map(texture => new THREE.MeshBasicMaterial({map: texture}));
-    //             resolve(materials);
-    //         }, undefined, reject);
-    //
-    //     });
-    // }
-
-    /**
-     * Toggles the background cube
-     * @param {boolean} isShow - turn on (true) or off (false) the background
-     */
-    // toggleBackground (isShow) {
-    //     if (isShow) {
-    //         this._getCubeMaterials(this.config.renderer.backgroundImageUrl)
-    //             .then(materials => {
-    //                 let size = this.config.renderer.backgroundCubeSize;
-    //                 let bgBox =
-    //                     new THREE.Mesh(new THREE.CubeGeometry(size, size, size), new THREE.MultiMaterial(materials));
-    //                 bgBox.geometry.center();
-    //                 bgBox.scale.set(-1, 1, 1);
-    //                 this.scene.add(bgBox);
-    //             });
-    //     } else {
-    //         // This code deletes ALL Meshes that are children of the scene. Be careful!
-    //         this.scene.children.forEach(child => child instanceof THREE.Mesh && this.scene.remove(child));
-    //     }
-    // }
-
-    /**
-     * Toggle full screen view
-     */
-    // toggleFullScreen () {
-    //     if (HelperService.isFullscreenEnabled()) {
-    //         if (!this.resizeCanvas) {
-    //             this.resizeCanvas = () => {
-    //                 let isFullscreenMode = ScreenFull.element === this.renderer.domElement;
-    //                 let width = isFullscreenMode ? screen.width : this.dimensions.width;
-    //                 let height = isFullscreenMode ? screen.height : this.dimensions.height;
-    //                 this.renderer.setSize(width, height);
-    //                 this.camera.aspect = width / height;
-    //                 this.camera.updateProjectionMatrix();
-    //                 if (!this.cameraControl) {
-    //                     this.render(); // Case: autorotation and camera movement are disabled
-    //                 }
-    //             };
-    //             document.addEventListener(ScreenFull.raw.fullscreenchange, this.resizeCanvas);
-    //         }
-    //         ScreenFull.toggle(this.renderer.domElement);
-    //     }
-    // }
+  /**
+   * Toggle full screen view
+   */
+  toggleFullScreen(): void {
+    if (ScreenFull.enabled) {
+      if (!this.resizeCanvas) {
+        this.resizeCanvas = () => {
+          const isFullscreenMode = ScreenFull.element === this.renderer.domElement;
+          const width = isFullscreenMode ? screen.width : this.dimensions.width;
+          const height = isFullscreenMode ? screen.height : this.dimensions.height;
+          this.renderer.setSize(width, height);
+          this.camera.aspect = width / height;
+          this.camera.updateProjectionMatrix();
+          if (!this.cameraControl) {
+            this.render(); // Case: autorotation and camera movement are disabled
+          }
+        };
+        document.addEventListener(ScreenFull.raw.fullscreenchange, this.resizeCanvas);
+      }
+      ScreenFull.toggle(this.renderer.domElement);
+    }
+  }
 
   /**
    * Cancel animation and remove event listeners when viewer destroyed
    */
-  destroy () {
+  destroy(): void {
     if (this.animationFrameId) {
       window.cancelAnimationFrame(this.animationFrameId);
     }
-    // if (this.resizeCanvas) {
-    //   document.removeEventListener(ScreenFull.raw.fullscreenchange, this.resizeCanvas, false);
-    // }
+    if (this.resizeCanvas) {
+      document.removeEventListener(ScreenFull.raw.fullscreenchange, this.resizeCanvas, false);
+    }
+    this.containerElement.removeEventListener('mousemove', this.mouseListener);
   }
 
   /**
@@ -238,8 +174,9 @@ export class ThreeRenderer {
     spotLight.castShadow = true;
     spotLight.shadow.camera.near = 0.5;
     this.scene.add(spotLight);
-    // const helper = new THREE.CameraHelper(spotLight.shadow.camera);
-    // this.scene.add(helper);
+    if (this.config.helpers.cameraHelper.isVisible) {
+      this.scene.add(new THREE.CameraHelper(spotLight.shadow.camera));
+    }
   }
 
   /**
@@ -267,6 +204,38 @@ export class ThreeRenderer {
         this.cameraControl.enablePan = false;
         this.cameraControl.enableZoom = false;
         this.cameraControl.enableRotate = false;
+      }
+    }
+  }
+
+  /**
+   * Handle mouse move event
+   * @param event
+   */
+  private onMouseMove(event: MouseEvent): void {
+    event.preventDefault();
+    const mouse = new THREE.Vector2();
+
+    // calculate mouse position in normalized device coordinates (-1 to +1) for both components
+    mouse.x = (event.offsetX / this.dimensions.width) * 2 - 1;
+    mouse.y = - (event.offsetY / this.dimensions.height) * 2 + 1;
+
+    // update the picking ray with the camera and mouse position
+    this.raycaster.setFromCamera(mouse, this.camera );
+
+    // calculate objects intersecting the picking ray
+    const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+
+    if (intersects.length) {
+      if (this.intersectedObject === intersects[0].object) {
+        return;
+      }
+      this.intersectedObject = intersects[0].object;
+      this.activeMesh.next(this.intersectedObject);
+    } else {
+      if (this.intersectedObject) {
+        this.intersectedObject = null;
+        this.activeMesh.next(this.intersectedObject);
       }
     }
   }
@@ -336,7 +305,12 @@ export class ThreeRenderer {
    */
   private render() {
     if (this.config.camera.isMobile || this.config.camera.autorotate.speed !== 0) {
-      this.animationFrameId = window.requestAnimationFrame(() => this.render());
+      this.ngZone.runOutsideAngular(() => {
+        if (this.animationFrameId) {
+          window.cancelAnimationFrame(this.animationFrameId);
+        }
+        this.animationFrameId = window.requestAnimationFrame(() => this.render());
+      });
       this.cameraControl.update();
     }
     this.renderer.render(this.scene, this.camera);

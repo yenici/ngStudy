@@ -6,14 +6,14 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { GaugeComponent } from './components/gauge/gauge.component';
 import { AudioComponent } from './components/audio/audio.component';
-import { ThreeComponent } from './components/three/three.component';
+import { CheckersComponent } from './components/checkers/checkers.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     GaugeComponent,
     AudioComponent,
-    ThreeComponent
+    CheckersComponent
   ],
   imports: [
     BrowserModule,

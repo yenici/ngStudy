@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import CONFIG from './checkers.config';
-import { CheckerColors } from './checker.colors';
+import { CheckerColors } from './checkers-colors.enume';
+import { CheckersPosition } from './checkers-position.interface';
 
 const MATERIAL_TEMPLATE = {
   emissive: 0,
@@ -25,23 +26,37 @@ const PIECE_MATERIALS = {
 export class Piece {
   mesh: THREE.Mesh;
 
-  constructor(private position = { x: 0, y: 0 }, private color: CheckerColors) {
+  constructor(public position: CheckersPosition = { x: 0, y: 0 }, public readonly color: CheckerColors) {
     this.mesh = new THREE.Mesh(
       new THREE.CylinderGeometry(
         CONFIG.piece.shape.radius,
         CONFIG.piece.shape.radius,
         CONFIG.piece.shape.height,
         CONFIG.piece.shape.segments),
-      PIECE_MATERIALS[this.color]
+      PIECE_MATERIALS[this.color].clone()
     );
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
-    this.mesh.position.set(this.position.x, CONFIG.piece.shape.z, this.position.y);
+    this.mesh.position.set(this.position.x * CONFIG.board.square.size, CONFIG.piece.shape.z,
+      this.position.y * CONFIG.board.square.size);
+    this.mesh.name =
+      `Piece_${this.color === CheckerColors.Light ? 'light' : 'dark'}_${this.position.x}_${this.position.y}`;
   }
 
-  move(position: { x: number, y: number }) {
+  move(position: CheckersPosition) {
     if (position) {
-      this.mesh.position.set(position.x, CONFIG.piece.shape.z, position.y);
+      this.position = position;
+      this.mesh.position.set(position.x * CONFIG.board.square.size, CONFIG.piece.shape.z,
+        position.y * CONFIG.board.square.size);
     }
+  }
+
+  activate(): void {
+    this.mesh.material.color.setHex(CONFIG.piece.colors.active);
+  }
+
+  deactivate(): void {
+    const color = this.color === CheckerColors.Light ? CONFIG.piece.colors.light : CONFIG.piece.colors.dark;
+    this.mesh.material.color.setHex(color);
   }
 }
