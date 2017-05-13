@@ -14,6 +14,7 @@
 
 import { NgZone } from '@angular/core/src/zone';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Subject } from 'rxjs/Subject';
 import { merge } from 'lodash';
 import * as THREE from 'three';
 import ScreenFull from 'screenfull';
@@ -24,7 +25,8 @@ THREE.OrbitControls = OrbitControls(THREE);
 THREE.OrbitControls.prototype.constructor = THREE.OrbitControls;
 
 export class ThreeRenderer {
-  public activeMesh = new BehaviorSubject<THREE.Mesh>(null);
+  public hoveredMesh = new BehaviorSubject<THREE.Mesh>(null);
+  public selectedMesh = new Subject<THREE.Mesh>();
 
   private config = RENDERER_CONFIG;
   private dimensions: { width: number, height: number };
@@ -39,7 +41,8 @@ export class ThreeRenderer {
 
   private raycaster = new THREE.Raycaster();
   private intersectedObject: THREE.Mesh;
-  private mouseListener = (event: MouseEvent) => this.onMouseMove(event);
+  private mouseMoveListener = (event: MouseEvent) => this.onMouseMove(event);
+  private mouseClickListener = (event: MouseEvent) => this.onMouseClick(event);
 
   /**
    * Create a viewer
@@ -59,7 +62,8 @@ export class ThreeRenderer {
     this.initLight();
     this.initCamera();
 
-    this.containerElement.addEventListener('mousemove', this.mouseListener, false);
+    this.containerElement.addEventListener('mousemove', this.mouseMoveListener, false);
+    this.containerElement.addEventListener('click', this.mouseClickListener, false);
   }
 
   /**
@@ -138,7 +142,8 @@ export class ThreeRenderer {
     if (this.resizeCanvas) {
       document.removeEventListener(ScreenFull.raw.fullscreenchange, this.resizeCanvas, false);
     }
-    this.containerElement.removeEventListener('mousemove', this.mouseListener);
+    this.containerElement.removeEventListener('mousemove', this.mouseMoveListener);
+    this.containerElement.removeEventListener('click', this.mouseClickListener);
   }
 
   /**
@@ -214,6 +219,39 @@ export class ThreeRenderer {
    */
   private onMouseMove(event: MouseEvent): void {
     event.preventDefault();
+    const intersectedMesh = this.getIntersectedObject(event);
+    if (intersectedMesh) {
+      if (this.intersectedObject === intersectedMesh) {
+        return;
+      }
+      this.intersectedObject = intersectedMesh;
+      this.hoveredMesh.next(this.intersectedObject);
+    } else {
+      if (this.intersectedObject) {
+        this.intersectedObject = null;
+        this.hoveredMesh.next(this.intersectedObject);
+      }
+    }
+  }
+
+  /**
+   * Handle mouse click event
+   * @param {MouseEvent} event
+   */
+  private onMouseClick(event: MouseEvent): void {
+    event.preventDefault();
+    const intersectedMesh = this.getIntersectedObject(event);
+    if (intersectedMesh) {
+      this.selectedMesh.next(intersectedMesh);
+    }
+  }
+
+  /**
+   * Detect an object under a pointer
+   * @param {MouseEvent} event
+   * @returns {THREE.Mesh | null}
+   */
+  private getIntersectedObject(event: MouseEvent): THREE.Mesh | null {
     const mouse = new THREE.Vector2();
 
     // calculate mouse position in normalized device coordinates (-1 to +1) for both components
@@ -227,17 +265,10 @@ export class ThreeRenderer {
     const intersects = this.raycaster.intersectObjects(this.scene.children, true);
 
     if (intersects.length) {
-      if (this.intersectedObject === intersects[0].object) {
-        return;
-      }
-      this.intersectedObject = intersects[0].object;
-      this.activeMesh.next(this.intersectedObject);
-    } else {
-      if (this.intersectedObject) {
-        this.intersectedObject = null;
-        this.activeMesh.next(this.intersectedObject);
-      }
+      return intersects[0].object;
     }
+
+    return null;
   }
 
   /**

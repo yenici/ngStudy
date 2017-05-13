@@ -59,4 +59,12 @@ export class Piece {
     const color = this.color === CheckerColors.Light ? CONFIG.piece.colors.light : CONFIG.piece.colors.dark;
     this.mesh.material.color.setHex(color);
   }
+
+  select(): void {
+    this.mesh.material.color.setHex(CONFIG.piece.colors.selected);
+  }
+
+  unselect(): void {
+    this.activate();
+  }
 }

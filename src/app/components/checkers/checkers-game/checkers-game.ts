@@ -9,7 +9,8 @@ import { Piece } from './piece';
 export class CheckersGame {
   private threeRenderer: ThreeRenderer;
   private pieces: Piece[] = [];
-  private activePiece: Piece;
+  private hoveredPiece: Piece;
+  private selectedPiece: Piece;
 
   constructor(ngZone: NgZone, private containerElement: HTMLDivElement, config?) {
     this.threeRenderer = new ThreeRenderer(ngZone, this.containerElement, config);
@@ -28,25 +29,44 @@ export class CheckersGame {
       }
     }
 
-    this.threeRenderer.activeMesh.subscribe((mesh: THREE.Mesh | null) => {
-      if (this.activePiece) {
-        this.activePiece.deactivate();
-        this.activePiece = null;
+    this.threeRenderer.hoveredMesh.subscribe((mesh: THREE.Mesh | null) => {
+      if (this.hoveredPiece) {
+        if (this.hoveredPiece === this.selectedPiece) {
+          return;
+        }
+      }
+
+      if (this.hoveredPiece) {
+        this.hoveredPiece.deactivate();
+        this.hoveredPiece = null;
       }
 
       const activePiece = this.pieces.find(piece => piece.mesh === mesh);
       if (activePiece) {
-        this.activePiece = activePiece;
+        this.hoveredPiece = activePiece;
         activePiece.activate();
+      }
+    });
+
+    this.threeRenderer.selectedMesh.subscribe((mesh: THREE.Mesh) => {
+      if (this.selectedPiece && this.selectedPiece.mesh === mesh) {
+        this.selectedPiece.unselect();
+        this.selectedPiece = null;
+        return;
+      }
+
+      this.selectedPiece = this.pieces.find(piece => piece.mesh === mesh);
+      if (this.selectedPiece) {
+        this.selectedPiece.select();
       }
     });
 
     this.threeRenderer.addObject(group);
 
-    this.pieces[8].activate();
-    window.setTimeout(() => {
-      this.pieces[8].move({ x: 0, y: 3 });
-      this.pieces[8].deactivate();
-    }, 3000);
+    // this.pieces[8].activate();
+    // window.setTimeout(() => {
+    //   this.pieces[8].move({ x: 0, y: 3 });
+    //   this.pieces[8].deactivate();
+    // }, 3000);
   }
 }

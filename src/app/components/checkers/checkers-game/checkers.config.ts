@@ -25,7 +25,8 @@ export default {
     colors: {
       light: 0xfecd4d,
       dark: 0x6f4e45,
-      active: 0xdd0000,
+      active: 0xff7070,
+      selected: 0xff0000,
       opacity: 0.95
     }
   }
