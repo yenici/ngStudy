@@ -69,4 +69,8 @@ export class CheckersGame {
     //   this.pieces[8].deactivate();
     // }, 3000);
   }
+
+  destryoy() {
+    this.threeRenderer.destroy();
+  }
 }
